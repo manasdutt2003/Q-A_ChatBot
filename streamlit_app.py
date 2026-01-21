@@ -30,7 +30,13 @@ if 'response_text' not in st.session_state:
 @st.cache_data(show_spinner=False)
 def check_api_key_status():
     """Checks the status of the GEMINI_API_KEY."""
-    key = os.getenv("GEMINI_API_KEY")
+    # Try getting key from Streamlit secrets first, then environment variable
+    key = None
+    if "GEMINI_API_KEY" in st.secrets:
+        key = st.secrets["GEMINI_API_KEY"]
+    else:
+        key = os.getenv("GEMINI_API_KEY")
+        
     if key and key != "YOUR_ACTUAL_KEY_HERE":
         st.success("✅ GEMINI_API_KEY detected and loaded.")
     else:
@@ -43,7 +49,12 @@ def check_api_key_status():
 def get_gemini_response(prompt: str, temperature: float, max_tokens: int) -> str:
     """Invokes the Gemini API and returns the response content."""
     
-    gemini_key = os.getenv("GEMINI_API_KEY") 
+    # Try getting key from Streamlit secrets first, then environment variable
+    gemini_key = None
+    if "GEMINI_API_KEY" in st.secrets:
+        gemini_key = st.secrets["GEMINI_API_KEY"]
+    else:
+        gemini_key = os.getenv("GEMINI_API_KEY") 
     
     if not gemini_key:
         # This error is caught by check_api_key_status, but remains here as a fallback
