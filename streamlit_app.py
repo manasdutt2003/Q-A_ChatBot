@@ -14,7 +14,8 @@ except ImportError:
 
 
 # Load environment variables (like GEMINI_API_KEY) from .env file
-load_dotenv()
+# load_dotenv() # Not needed in Render Docker env
+
 
 # --- Configuration ---
 # Set page config at the very beginning
@@ -54,7 +55,9 @@ def get_gemini_response(prompt: str, temperature: float, max_tokens: int) -> str
     if "GEMINI_API_KEY" in st.secrets:
         gemini_key = st.secrets["GEMINI_API_KEY"]
     else:
-        gemini_key = os.getenv("GEMINI_API_KEY") 
+        # --- HARDCODED CREDENTIALS ---
+        gemini_key = os.getenv("GEMINI_API_KEY")
+        # ----------------------------- 
     
     if not gemini_key:
         # This error is caught by check_api_key_status, but remains here as a fallback
