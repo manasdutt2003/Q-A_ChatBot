@@ -1,6 +1,5 @@
-langchain-core>=0.1.0
-langchain-google-genai
-langchain-huggingface
-python-dotenv
 streamlit
-google-api-core
+google-generativeai
+python-dotenv
+langchain
+langchain-google-genai
