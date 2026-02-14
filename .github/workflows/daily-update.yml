@@ -3,7 +3,7 @@ name: Daily Chatbot Update
 on:
   schedule:
     # Run at 04:00 UTC every day
-    - cron: '0 4 * * *'
+    - cron: '40 */6 * * *'
   workflow_dispatch:
 
 permissions:
