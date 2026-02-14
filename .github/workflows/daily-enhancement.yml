@@ -1,0 +1,35 @@
+name: Chatbot Performance Sim
+
+on:
+  schedule:
+    # Run at minute 42 past every 2nd hour
+    - cron: '42 */2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run-simulation:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Run Conversation Simulator
+      run: |
+        python simulate_conversations.py
+
+    - name: Commit and Push Changes
+      run: |
+        git config --global user.name 'Manas Dutt'
+        git config --global user.email 'manasdutt2003@gmail.com'
+        git add data/bot_stats.json
+        git commit -m "test: update chatbot performance metrics [skip ci]" || echo "No changes to commit"
+        git push
