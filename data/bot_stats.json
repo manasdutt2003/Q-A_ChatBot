@@ -1,7 +1,7 @@
 {
   "date": "2026-02-26",
-  "queries_processed": 85,
+  "queries_processed": 65,
   "most_common_topic": "Debugging",
-  "average_response_time_ms": 1677.18,
+  "average_response_time_ms": 827.59,
   "user_satisfaction_score": 4.9
 }
