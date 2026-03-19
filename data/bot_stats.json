@@ -1,7 +1,7 @@
 {
   "date": "2026-03-19",
-  "queries_processed": 95,
-  "most_common_topic": "Python",
-  "average_response_time_ms": 1578.11,
-  "user_satisfaction_score": 4.7
+  "queries_processed": 16,
+  "most_common_topic": "LangChain",
+  "average_response_time_ms": 987.19,
+  "user_satisfaction_score": 4.2
 }
