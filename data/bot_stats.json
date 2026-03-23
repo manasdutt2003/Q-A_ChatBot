@@ -1,7 +1,7 @@
 {
   "date": "2026-03-23",
-  "queries_processed": 19,
-  "most_common_topic": "LangChain",
-  "average_response_time_ms": 519.36,
-  "user_satisfaction_score": 4.1
+  "queries_processed": 36,
+  "most_common_topic": "Debugging",
+  "average_response_time_ms": 1367.08,
+  "user_satisfaction_score": 4.9
 }
