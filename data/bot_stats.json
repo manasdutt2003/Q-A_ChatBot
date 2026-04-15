@@ -1,7 +1,7 @@
 {
   "date": "2026-04-15",
-  "queries_processed": 89,
-  "most_common_topic": "OpenAI",
-  "average_response_time_ms": 671.61,
-  "user_satisfaction_score": 4.6
+  "queries_processed": 51,
+  "most_common_topic": "LangChain",
+  "average_response_time_ms": 532.17,
+  "user_satisfaction_score": 5.0
 }
