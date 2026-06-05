@@ -1,7 +1,7 @@
 {
   "date": "2026-06-05",
-  "queries_processed": 54,
-  "most_common_topic": "OpenAI",
-  "average_response_time_ms": 1363.77,
-  "user_satisfaction_score": 4.8
+  "queries_processed": 38,
+  "most_common_topic": "Deployment",
+  "average_response_time_ms": 1172.82,
+  "user_satisfaction_score": 4.5
 }
