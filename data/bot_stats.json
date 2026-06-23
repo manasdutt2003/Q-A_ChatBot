@@ -1,7 +1,7 @@
 {
   "date": "2026-06-23",
-  "queries_processed": 92,
-  "most_common_topic": "Deployment",
-  "average_response_time_ms": 1227.56,
+  "queries_processed": 34,
+  "most_common_topic": "Debugging",
+  "average_response_time_ms": 1584.27,
   "user_satisfaction_score": 4.2
 }
