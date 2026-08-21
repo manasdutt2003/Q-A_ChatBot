@@ -1,7 +1,7 @@
 {
   "date": "2026-08-21",
-  "queries_processed": 93,
-  "most_common_topic": "Deployment",
-  "average_response_time_ms": 1110.04,
-  "user_satisfaction_score": 4.5
+  "queries_processed": 82,
+  "most_common_topic": "LangChain",
+  "average_response_time_ms": 1890.16,
+  "user_satisfaction_score": 4.4
 }
