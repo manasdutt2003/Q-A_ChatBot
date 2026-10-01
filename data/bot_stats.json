@@ -1,7 +1,7 @@
 {
   "date": "2026-10-01",
-  "queries_processed": 10,
-  "most_common_topic": "Deployment",
-  "average_response_time_ms": 1582.35,
-  "user_satisfaction_score": 4.2
+  "queries_processed": 55,
+  "most_common_topic": "Streamlit",
+  "average_response_time_ms": 571.64,
+  "user_satisfaction_score": 5.0
 }
