@@ -1,7 +1,7 @@
 {
   "date": "2026-10-28",
-  "queries_processed": 32,
+  "queries_processed": 16,
   "most_common_topic": "Deployment",
-  "average_response_time_ms": 1981.88,
-  "user_satisfaction_score": 4.5
+  "average_response_time_ms": 1649.17,
+  "user_satisfaction_score": 4.3
 }
