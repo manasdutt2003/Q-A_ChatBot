@@ -1,7 +1,7 @@
 {
   "date": "2026-11-01",
-  "queries_processed": 44,
-  "most_common_topic": "Streamlit",
-  "average_response_time_ms": 1968.84,
-  "user_satisfaction_score": 4.8
+  "queries_processed": 69,
+  "most_common_topic": "LangChain",
+  "average_response_time_ms": 1542.64,
+  "user_satisfaction_score": 4.2
 }
