@@ -1,9 +1,6 @@
 name: Chatbot Performance Sim
 
 on:
-  schedule:
-    # Run at minute 42 past every 2nd hour
-    - cron: '42 */2 * * *'
   workflow_dispatch:
 
 permissions:
