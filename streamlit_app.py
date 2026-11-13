@@ -1,122 +1,116 @@
+"""Gemini Q&A chatbot built with Streamlit and LangChain."""
+
+from __future__ import annotations
+
 import os
+
 import streamlit as st
 from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI 
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_google_genai import ChatGoogleGenerativeAI
 
-# FIX: Change the import path for InvalidArgument to the correct location
-try:
-    from google.api_core.exceptions import InvalidArgument 
-except ImportError:
-    # Fallback/error handling if the google-api-core package is missing
-    InvalidArgument = Exception
-    st.error("Missing dependency: Please run 'pip install google-api-core' in your terminal.")
+load_dotenv()
+
+DEFAULT_MODEL = "gemini-2.5-flash"
+MODELS = ("gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro")
+DEFAULT_SYSTEM_PROMPT = (
+    "You are a helpful assistant. Answer clearly and concisely, and say so "
+    "when you are not sure."
+)
+# Only the most recent turns are sent, so long chats stay inside the context
+# window and the cost per message stays bounded.
+MAX_HISTORY_MESSAGES = 20
+
+st.set_page_config(page_title="Gemini Q&A Chatbot", page_icon="💬", layout="centered")
 
 
-# Load environment variables (like GEMINI_API_KEY) from .env file
-# load_dotenv() # Not needed in Render Docker env
-
-
-# --- Configuration ---
-# Set page config at the very beginning
-st.set_page_config(page_title="Gemini Q&A Demo", layout="centered")
-st.header("Langchain Gemini Application")
-
-# Initialize session state for storing history/results
-if 'response_text' not in st.session_state:
-    st.session_state['response_text'] = ""
-
-# --- DIAGNOSTIC FUNCTION ---
-# We keep caching on for this function as it's only a local check
-@st.cache_data(show_spinner=False)
-def check_api_key_status():
-    """Checks the status of the GEMINI_API_KEY."""
-    # Try getting key from Streamlit secrets first, then environment variable
-    key = None
-    if "GEMINI_API_KEY" in st.secrets:
-        key = st.secrets["GEMINI_API_KEY"]
-    else:
-        key = os.getenv("GEMINI_API_KEY")
-        
-    if key and key != "YOUR_ACTUAL_KEY_HERE":
-        st.success("✅ GEMINI_API_KEY detected and loaded.")
-    else:
-        st.warning("⚠️ GEMINI_API_KEY not found. Please ensure it is set in your .env file.")
-
-# --- LLM Function with Caching (DISABLED FOR DEBUGGING) ---
-
-# Commented out @st.cache_data to ensure we see fresh results and errors immediately
-# @st.cache_data 
-def get_gemini_response(prompt: str, temperature: float, max_tokens: int) -> str:
-    """Invokes the Gemini API and returns the response content."""
-    
-    # Try getting key from Streamlit secrets first, then environment variable
-    gemini_key = None
-    if "GEMINI_API_KEY" in st.secrets:
-        gemini_key = st.secrets["GEMINI_API_KEY"]
-    else:
-        # --- HARDCODED CREDENTIALS ---
-        gemini_key = os.getenv("GEMINI_API_KEY")
-        # ----------------------------- 
-    
-    if not gemini_key:
-        # This error is caught by check_api_key_status, but remains here as a fallback
-        return "Error: GEMINI_API_KEY environment variable not set."
-
+def get_api_key() -> str | None:
+    """Read the key from Streamlit secrets first, then the environment."""
     try:
-        # Initialize LLM model 
-        llm = ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash",
-            google_api_key=gemini_key, 
-            temperature=temperature,
-            max_output_tokens=max_tokens 
-        )
-        
-        # Use st.spinner for a loading indicator during the API call
-        with st.spinner("Asking Gemini..."):
-            response = llm.invoke([
-                HumanMessage(content=prompt)
-            ])
-            return response.content
+        if "GEMINI_API_KEY" in st.secrets:
+            return st.secrets["GEMINI_API_KEY"]
+    except Exception:
+        # st.secrets raises when no secrets.toml exists, which is the normal
+        # case for local runs that use a .env file.
+        pass
+    return os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
 
-    except InvalidArgument as e:
-        # ❗ RETURN THE ERROR MESSAGE DIRECTLY ❗
-        # This ensures the API key error is displayed to the user.
-        return f"API FAILURE: Invalid/Expired Key. Details: {e}"
-    except Exception as e:
-        return f"AN UNEXPECTED ERROR OCCURRED: {e}"
 
-# --- Streamlit UI and Logic ---
+@st.cache_resource(show_spinner=False)
+def get_llm(api_key: str, model: str, temperature: float, max_tokens: int):
+    return ChatGoogleGenerativeAI(
+        model=model,
+        google_api_key=api_key,
+        temperature=temperature,
+        max_output_tokens=max_tokens,
+    )
 
-# Display the key status check at the top
-check_api_key_status()
 
-# 1. Input Fields
-input_text = st.text_input("Input your question here:", key="input")
+def to_langchain_messages(system_prompt: str, history: list[dict]):
+    messages = [SystemMessage(content=system_prompt)] if system_prompt.strip() else []
+    for item in history[-MAX_HISTORY_MESSAGES:]:
+        cls = HumanMessage if item["role"] == "user" else AIMessage
+        messages.append(cls(content=item["content"]))
+    return messages
 
-# Use slightly higher tokens and the same temperature 0.7 
-# (You can try setting temperature=0.9 for more creativity)
-DYNAMIC_MAX_TOKENS = 500 
-DYNAMIC_TEMPERATURE = 0.7
 
-# 2. Submit Button Logic (Conditional Execution)
-submit = st.button("Ask the question")
+def chunk_text(chunk) -> str:
+    """Gemini can return content as a string or as a list of parts."""
+    content = chunk.content
+    if isinstance(content, str):
+        return content
+    return "".join(
+        part.get("text", "") if isinstance(part, dict) else str(part)
+        for part in content
+    )
 
-if submit and input_text:
-    # Call the LLM function with the new, higher token limit
-    result = get_gemini_response(input_text, 
-                                 temperature=DYNAMIC_TEMPERATURE, 
-                                 max_tokens=DYNAMIC_MAX_TOKENS)
-    
-    # Store the result in session state to maintain display across reruns
-    st.session_state['response_text'] = result
-    st.session_state['last_question'] = input_text
 
-# 3. Display Output
-if st.session_state['response_text']:
-    st.subheader("The Answer")
-    if st.session_state.get('last_question'):
-        st.info(f"Question: {st.session_state['last_question']}")
-    
-    # Use st.markdown to display either the successful answer OR the error string
-    st.markdown(st.session_state['response_text'])
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+with st.sidebar:
+    st.header("Settings")
+    model = st.selectbox("Model", MODELS, index=MODELS.index(DEFAULT_MODEL))
+    temperature = st.slider("Temperature", 0.0, 1.0, 0.7, 0.05)
+    max_tokens = st.slider("Max response tokens", 128, 4096, 1024, 128)
+    system_prompt = st.text_area("System prompt", DEFAULT_SYSTEM_PROMPT, height=110)
+    if st.button("Clear conversation", use_container_width=True):
+        st.session_state.messages = []
+        st.rerun()
+
+st.title("💬 Gemini Q&A Chatbot")
+st.caption("Ask a question. Follow-ups keep the context of the conversation.")
+
+api_key = get_api_key()
+if not api_key:
+    st.warning(
+        "No API key found. Set `GEMINI_API_KEY` in a `.env` file, as an "
+        "environment variable, or in Streamlit secrets."
+    )
+    st.stop()
+
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+if prompt := st.chat_input("Ask a question"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+        try:
+            llm = get_llm(api_key, model, temperature, max_tokens)
+            stream = llm.stream(
+                to_langchain_messages(system_prompt, st.session_state.messages)
+            )
+            reply = st.write_stream(chunk_text(chunk) for chunk in stream)
+        except Exception as error:  # surface API failures instead of crashing
+            reply = None
+            st.error(f"The request failed: {error}")
+
+    if reply:
+        st.session_state.messages.append({"role": "assistant", "content": reply})
+    else:
+        # Drop the unanswered question so a retry does not send it twice.
+        st.session_state.messages.pop()
